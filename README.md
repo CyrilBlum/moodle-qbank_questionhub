@@ -95,7 +95,7 @@ qbank_questionhub/
 Navigate to **Site Administration > Plugins > Question bank plugins > Question Hub**:
 - **Hub Base URL:** `https://hub.cblum.ch` (default)
 - **OAuth 2.0 Client ID:** `moodle-plugin-client` (default)
-- **Allow Teacher Account Linking:** Enabled (1). Without a linked account, teachers cannot use the Hub.
+- **Allow Teacher Account Linking:** Enabled (1). Without a linked account, teachers can only browse and import public packages.
 - **Remove active content on import:** Enabled (1).
 - **Keep active content in CodeRunner questions:** Disabled (0). Exception to the previous setting.
 
