@@ -134,6 +134,25 @@ class auth_manager {
     }
 
     /**
+     * Disconnects a user: asks the Hub to revoke an OAuth token, then deletes the stored token.
+     * The local link always goes, also when the Hub cannot be reached.
+     *
+     * @param int $userid Moodle user ID.
+     */
+    public static function disconnect_user(int $userid): void {
+        global $DB;
+        $token = $DB->get_field('qbank_questionhub_tokens', 'access_token', ['userid' => $userid]);
+        if (!empty($token) && strpos($token, 'mqh_pat_') !== 0) {
+            try {
+                (new api_client(''))->revoke_oauth_token($token);
+            } catch (\moodle_exception $e) {
+                debugging('Question Hub token not revoked: ' . $e->getMessage(), DEBUG_DEVELOPER);
+            }
+        }
+        self::delete_user_token($userid);
+    }
+
+    /**
      * Initializes OAuth 2.0 PKCE flow and returns marketplace authorization URL.
      *
      * @param string $returnurl URL to return to after authorization.

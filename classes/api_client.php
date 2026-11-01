@@ -431,6 +431,16 @@ class api_client {
     }
 
     /**
+     * Revokes an OAuth access token on the Hub (RFC 7009).
+     *
+     * @param string $token The access token.
+     * @throws moodle_exception On error.
+     */
+    public function revoke_oauth_token(string $token): void {
+        $this->post('/oauth/revoke', ['token' => $token], false);
+    }
+
+    /**
      * Generic GET request handler.
      *
      * @param string $endpoint API endpoint path.

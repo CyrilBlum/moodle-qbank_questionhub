@@ -31,7 +31,7 @@ $returnurl = optional_param('returnurl', '', PARAM_LOCALURL);
 $defaultreturn = new moodle_url('/question/bank/questionhub/view.php');
 $target = !empty($returnurl) ? new moodle_url($returnurl) : $defaultreturn;
 
-\qbank_questionhub\auth_manager::delete_user_token((int)$USER->id);
+\qbank_questionhub\auth_manager::disconnect_user((int)$USER->id);
 \core\notification::success(get_string('disconnect_success', 'qbank_questionhub'));
 
 redirect($target);
