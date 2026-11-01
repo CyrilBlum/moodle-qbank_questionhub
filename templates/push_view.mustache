@@ -59,6 +59,7 @@
             {{#cmid}}<input type="hidden" name="cmid" value="{{cmid}}">{{/cmid}}
             <input type="hidden" name="categoryid" value="{{categoryid}}">
             <input type="hidden" name="updatepackageid" value="{{update_package_id}}">
+            <div class="alert alert-warning mb-3">{{#str}} no_personal_data_notice, qbank_questionhub {{/str}}</div>
             {{#github_push_note}}
             <div class="alert {{#github_push_linked}}alert-info{{/github_push_linked}}{{^github_push_linked}}alert-secondary{{/github_push_linked}} small mb-3">
                 <i class="fa fa-github mr-1 me-1" aria-hidden="true"></i>{{github_push_note}}

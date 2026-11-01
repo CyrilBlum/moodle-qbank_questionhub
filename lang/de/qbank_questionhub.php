@@ -262,6 +262,7 @@ $string['missing_on_hub_help'] = 'Der Hub bietet dieses Paket nicht mehr an. Die
 $string['my_packages'] = 'Meine Pakete (erstellt oder mitbearbeitet)';
 $string['no_packages'] = 'Sie haben noch keine Pakete veröffentlicht.';
 $string['no_packages_found'] = 'Keine Pakete gefunden, die den Kriterien entsprechen.';
+$string['no_personal_data_notice'] = 'Die Fragen dürfen keine Personendaten enthalten, also keine Namen von SchülerInnen, keine Noten und keine anderen Angaben zu bestimmten Personen. Das gilt auch für Bilder, Anhänge und Rückmeldungen und auch für private Pakete.';
 $string['open_category_questions'] = 'Diese Kategorie in der Fragensammlung öffnen';
 $string['open_content_notice'] = 'Mit der Veröffentlichung stellen Sie die Fragen unter die gewählte Creative-Commons-Lizenz. Öffentliche Pakete werden damit zu offenen Bildungsmaterialien: Alle dürfen sie herunterladen, verwenden, forken, verändern und weitergeben, mit Nennung der Urheberschaft (ausser bei CC0) und bei CC BY-SA unter derselben Lizenz. Private Pakete tragen die Lizenz ebenfalls, sind aber nur für freigegebene Personen sichtbar. Veröffentlichen Sie nur Inhalte, an denen Sie die Rechte haben.';
 $string['open_hub_package'] = 'Im Hub öffnen';

@@ -262,6 +262,7 @@ $string['missing_on_hub_help'] = 'The Hub no longer offers this package. The que
 $string['my_packages'] = 'My packages (created or edited)';
 $string['no_packages'] = 'You have not published any packages yet.';
 $string['no_packages_found'] = 'No packages found matching your criteria.';
+$string['no_personal_data_notice'] = 'Questions must not contain personal data: no student names, no grades and no other details about identifiable people. This also applies to images, attachments and feedback, and to private packages.';
 $string['open_category_questions'] = 'Open this category in the question bank';
 $string['open_content_notice'] = 'By publishing, you place the questions under the chosen Creative Commons licence. Public packages become open educational resources: anyone may download, use, fork, change and share them, with attribution (except CC0) and, for CC BY-SA, under the same licence. Private packages carry the licence too but are only visible to people you approve. Only publish content you hold the rights to.';
 $string['open_hub_package'] = 'Open in Hub';
