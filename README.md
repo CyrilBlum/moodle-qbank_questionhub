@@ -20,7 +20,7 @@ Native Moodle subplugin extending the core Question Bank subsystem, enabling tea
   - Handles Base64 embedded media translation to/from Moodle File Storage API (`@@PLUGINFILE@@`).
 - **REST API Client:**
   - Built with native Moodle `\curl` honoring system proxies, CA bundles, and timeout configs.
-  - Two-tier authentication: Teacher OAuth 2.0 PKCE account linking with institutional PAT fallback.
+  - Teacher authentication: OAuth 2.0 PKCE account linking or a Personal Access Token.
 
 ## Directory Layout
 
@@ -95,8 +95,9 @@ qbank_questionhub/
 Navigate to **Site Administration > Plugins > Question bank plugins > Question Hub**:
 - **Hub Base URL:** `https://hub.cblum.ch` (default)
 - **OAuth 2.0 Client ID:** `moodle-plugin-client` (default)
-- **Institutional Access Token:** Optional system-wide PAT for unlinked teachers.
-- **Allow Teacher Account Linking:** Enabled (1).
+- **Allow Teacher Account Linking:** Enabled (1). Without a linked account, teachers cannot use the Hub.
+- **Remove active content on import:** Enabled (1).
+- **Keep active content in CodeRunner questions:** Disabled (0). Exception to the previous setting.
 
 ## License
 

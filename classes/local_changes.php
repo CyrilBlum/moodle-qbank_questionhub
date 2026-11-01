@@ -54,7 +54,7 @@ class local_changes {
         if ($roles === null) {
             $roles = [];
             try {
-                foreach ((new api_client(null, null, 30, true))->get_my_packages() as $package) {
+                foreach ((new api_client())->get_my_packages() as $package) {
                     $roles[(string)$package['id']] = (string)($package['my_role'] ?? 'admin');
                 }
             } catch (\Throwable $e) {

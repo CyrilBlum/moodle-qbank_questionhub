@@ -170,6 +170,82 @@ final class preflight_validator_test extends \advanced_testcase {
     }
 
     /**
+     * Stripping also covers auto-format texts and leaves text answers such as «<script>» alone.
+     */
+    public function test_strip_active_content_all_formats(): void {
+        $this->resetAfterTest();
+        $xml = package_importer::strip_active_content('<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+  <question type="shortanswer">
+    <name><text>Active</text></name>
+    <questiontext format="moodle_auto_format"><text>Text&lt;script&gt;alert(1)&lt;/script&gt;</text></questiontext>
+    <generalfeedback format="markdown"><text>Gut&lt;script&gt;alert(2)&lt;/script&gt;</text></generalfeedback>
+    <answer fraction="100" format="moodle_auto_format"><text>&lt;script&gt;</text></answer>
+  </question>
+</quiz>');
+        $doc = simplexml_load_string($xml);
+        $this->assertStringNotContainsString('script', (string)$doc->question->questiontext->text);
+        $this->assertStringNotContainsString('script', (string)$doc->question->generalfeedback->text);
+        $this->assertSame('<script>', (string)$doc->question->answer->text);
+    }
+
+    /**
+     * Returns a CodeRunner question with a script in the text and an event handler in the HTML UI.
+     *
+     * @return string Moodle XML
+     */
+    private static function coderunner_xml(): string {
+        return '<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+  <question type="coderunner">
+    <name><text>UI</text></name>
+    <questiontext format="html"><text>Text&lt;script&gt;alert(1)&lt;/script&gt;</text></questiontext>
+    <globalextra>&lt;button onclick="alert(2)"&gt;x&lt;/button&gt;</globalextra>
+  </question>
+</quiz>';
+    }
+
+    /**
+     * Without the exception, CodeRunner questions are cleaned, including the HTML UI.
+     */
+    public function test_strip_active_content_coderunner(): void {
+        $this->resetAfterTest();
+        $doc = simplexml_load_string(package_importer::strip_active_content(self::coderunner_xml()));
+        $this->assertStringNotContainsString('script', (string)$doc->question->questiontext->text);
+        $this->assertStringNotContainsString('onclick', (string)$doc->question->globalextra);
+        $active = package_importer::active_content_questions(self::coderunner_xml());
+        $this->assertSame(['UI'], $active['removed']);
+        $this->assertTrue($active['coderunner_removed']);
+    }
+
+    /**
+     * With the exception, CodeRunner questions stay unchanged and other questions are still cleaned.
+     */
+    public function test_keep_coderunner_content(): void {
+        $this->resetAfterTest();
+        set_config('keepcoderunnercontent', 1, 'qbank_questionhub');
+        $doc = simplexml_load_string(package_importer::strip_active_content(self::coderunner_xml()));
+        $this->assertStringContainsString('<script>', (string)$doc->question->questiontext->text);
+        $this->assertStringContainsString('onclick', (string)$doc->question->globalextra);
+        $active = package_importer::active_content_questions(self::coderunner_xml());
+        $this->assertSame(['UI'], $active['kept']);
+        $this->assertFalse($active['coderunner_removed']);
+
+        $this->assertFalse(package_importer::keeps_active_content('multichoice'));
+        set_config('stripactivecontent', 0, 'qbank_questionhub');
+        $this->assertTrue(package_importer::keeps_active_content('multichoice'));
+    }
+
+    /**
+     * Active content in the fields of CodeRunner's HTML UI is reported.
+     */
+    public function test_active_content_in_coderunner_ui_warned(): void {
+        $doc = simplexml_load_string(self::coderunner_xml());
+        unset($doc->question->questiontext);
+        $this->assertTrue(preflight_validator::has_active_content($doc->question));
+    }
+
+    /**
      * A category path without context token is reported with the literal token name.
      */
     public function test_category_missing_context_message(): void {

@@ -36,6 +36,12 @@ class preflight_validator {
     public const ACTIVE_CONTENT_PATTERN = '/<\s*(?:script|iframe|frame|object|embed|applet|base|meta)\b|<[a-z][^>]*\son[a-z]+\s*=|'
         . '(?:href|src|action|formaction)\s*=\s*["\']?\s*(?:javascript|vbscript|data:text\/html)/i';
 
+    /** CodeRunner fields that its HTML answer UI writes into the page. */
+    public const CODERUNNER_UI_FIELDS = ['globalextra', 'prototypeextra'];
+
+    /** Question types whose answers are compared as text and displayed escaped. */
+    public const PLAIN_ANSWER_TYPES = ['shortanswer', 'numerical', 'calculated', 'calculatedsimple', 'truefalse'];
+
     /** Maximum allowed single media file in bytes (10 MB). */
     public const MAX_MEDIA_FILE_BYTES = 10485760;
 
@@ -280,7 +286,14 @@ class preflight_validator {
      * @return bool
      */
     public static function has_active_content(SimpleXMLElement $q): bool {
-        foreach ($q->xpath('.//text') as $text) {
+        $qtype = (string)$q['type'];
+        $texts = $q->xpath(in_array($qtype, self::PLAIN_ANSWER_TYPES, true) ? './/text[not(parent::answer)]' : './/text');
+        if ($qtype === 'coderunner') {
+            foreach (self::CODERUNNER_UI_FIELDS as $field) {
+                $texts = array_merge($texts, $q->xpath('./' . $field));
+            }
+        }
+        foreach ($texts as $text) {
             if (preg_match(self::ACTIVE_CONTENT_PATTERN, (string)$text)) {
                 return true;
             }

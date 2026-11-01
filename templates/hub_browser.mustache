@@ -146,6 +146,12 @@
                     {{/conflict}}
                 </div>
                 {{/conflictcount}}
+                {{#activekept}}
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="confirmactive" id="qhConfirmActive" value="1" required>
+                    <label class="form-check-label" for="qhConfirmActive">{{#str}} import_active_content_confirm, qbank_questionhub {{/str}}</label>
+                </div>
+                {{/activekept}}
                 <button type="submit" class="btn btn-primary">{{#str}} import_preview_confirm, qbank_questionhub {{/str}}</button>
             </form>
             <a href="{{browse_tab_url}}" class="btn btn-outline-secondary ml-2">{{#str}} import_preview_cancel, qbank_questionhub {{/str}}</a>

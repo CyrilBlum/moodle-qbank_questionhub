@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Tests the saved Hub URL, the institutional token and the admin's own linked account.
+ * Tests the saved Hub URL and the admin's own linked account.
  *
  * @package    qbank_questionhub
  * @copyright  2026 Cyril Blum
@@ -52,18 +52,6 @@ if ($reachable) {
     $describe = static function (array $me): string {
         return s(trim(($me['full_name'] ?? '') . ' <' . ($me['email'] ?? '') . '>'));
     };
-
-    $institutiontoken = trim((string)get_config('qbank_questionhub', 'institutiontoken'));
-    if ($institutiontoken === '') {
-        $results[] = [get_string('testconnection_token_none', 'qbank_questionhub'), 'info'];
-    } else {
-        try {
-            $me = (new \qbank_questionhub\api_client($institutiontoken, null, 15))->get_me();
-            $results[] = [get_string('testconnection_token_ok', 'qbank_questionhub', $describe($me)), 'success'];
-        } catch (\Exception $e) {
-            $results[] = [get_string('testconnection_token_failed', 'qbank_questionhub', $e->getMessage()), 'error'];
-        }
-    }
 
     $usertoken = \qbank_questionhub\auth_manager::resolve_user_token((int)$USER->id);
     if ($usertoken !== null) {

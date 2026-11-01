@@ -22,34 +22,13 @@ use moodle_url;
 /**
  * Authentication and token management service for Question Hub accounts.
  *
- * Implements two-tier token resolution (User OAuth PKCE > Institutional PAT fallback).
+ * Resolves the Hub token of a Moodle user (OAuth PKCE or pasted PAT).
  *
  * @package    qbank_questionhub
  * @copyright  2026 Cyril Blum
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class auth_manager {
-    /**
-     * Resolves the active access token for API requests.
-     *
-     * @param int|null $userid Specific user ID or null for currently logged-in user.
-     * @return string|null Active bearer token or null if unauthenticated.
-     */
-    public static function resolve_active_token(?int $userid = null): ?string {
-        $usertoken = self::resolve_user_token($userid);
-        if ($usertoken !== null) {
-            return $usertoken;
-        }
-
-        // Fallback to institutional Personal Access Token from plugin settings.
-        $institutiontoken = get_config('qbank_questionhub', 'institutiontoken');
-        if (!empty($institutiontoken)) {
-            return trim($institutiontoken);
-        }
-
-        return null;
-    }
-
     /**
      * Whether the site lets teachers link a Hub account (OAuth or PAT); unset counts as allowed, like the default.
      */
@@ -58,7 +37,7 @@ class auth_manager {
     }
 
     /**
-     * Resolves only the current Moodle user's Hub token, without an institutional fallback.
+     * Resolves the current Moodle user's Hub token.
      */
     public static function resolve_user_token(?int $userid = null): ?string {
         global $USER, $DB;

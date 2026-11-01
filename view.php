@@ -112,7 +112,7 @@ if (data_submitted()) {
             if (!$link || (int)$link->categoryid !== $categoryid || (string)$link->package_id === $targetid) {
                 throw new moodle_exception('error_switch_variant', 'qbank_questionhub');
             }
-            $client = new \qbank_questionhub\api_client(null, null, 30, true);
+            $client = new \qbank_questionhub\api_client();
             $current = $client->get_package((string)$link->package_id);
             $target = $client->get_package($targetid);
             if (
@@ -151,7 +151,7 @@ if (data_submitted()) {
         redirect($thispageurl);
     } else if ($action === 'edit_package') {
         try {
-            $client = new \qbank_questionhub\api_client(null, null, 30, true);
+            $client = new \qbank_questionhub\api_client();
             $grades = optional_param_array('grades', [], PARAM_ALPHANUM);
             $tags = array_values(array_filter(array_map('trim', explode(',', optional_param('tags', '', PARAM_TEXT)))));
             $patch = [
@@ -182,7 +182,7 @@ if (data_submitted()) {
     } else if ($action === 'create_github_repo') {
         // Create a private repository in the connected GitHub account and link it; the Hub commits the current version.
         try {
-            $client = new \qbank_questionhub\api_client(null, null, 30, true);
+            $client = new \qbank_questionhub\api_client();
             $created = $client->create_github_repo(
                 \qbank_questionhub\hub_input::repo_name(required_param('repo_name', PARAM_TEXT))
             );
@@ -200,7 +200,7 @@ if (data_submitted()) {
         redirect($thispageurl);
     } else if ($action === 'withdraw_package' || $action === 'withdraw_release') {
         try {
-            $client = new \qbank_questionhub\api_client(null, null, 30, true);
+            $client = new \qbank_questionhub\api_client();
             $wpackage = \qbank_questionhub\hub_input::package_id(required_param('packageid', PARAM_TEXT));
             if ($action === 'withdraw_package') {
                 $client->withdraw_package($wpackage);
@@ -272,7 +272,7 @@ if (data_submitted()) {
             redirect($thispageurl);
         }
         try {
-            $client = new \qbank_questionhub\api_client(null, null, 30, true);
+            $client = new \qbank_questionhub\api_client();
             $request = [
                 'version' => (string)$link->package_version,
                 'visibility' => optional_param('visibility', 'public', PARAM_ALPHA) === 'private' ? 'private' : 'public',
@@ -352,7 +352,7 @@ if (data_submitted()) {
                 get_string('imported_package_default', 'qbank_questionhub'),
                 PARAM_TEXT
             );
-            $client = new \qbank_questionhub\api_client(null, null, 30, true);
+            $client = new \qbank_questionhub\api_client();
             $xmlcontent = $client->download_release($packageid, $version);
 
             $importer = new \qbank_questionhub\package_importer(
@@ -371,17 +371,23 @@ if (data_submitted()) {
                     \core\notification::warning(get_string('import_conflicts_found', 'qbank_questionhub'));
                 }
             }
+            // Active content that stays needs a decision in the preview, also for a one-click pull.
+            $activecontent = \qbank_questionhub\package_importer::active_content_questions($xmlcontent);
+            if (!$dryrun && $activecontent['kept'] && !optional_param('confirmactive', 0, PARAM_BOOL)) {
+                $dryrun = true;
+            }
             if ($dryrun) {
                 $items = $items ?? $importer->preview_package($xmlcontent, $metadata, $categorymode);
-                $activenames = array_column(array_filter(
-                    $importer->run_diagnostics($xmlcontent)->get_warnings(),
-                    static fn($warning) => $warning['code'] === 'WARN_ACTIVE_CONTENT'
-                ), 'questionName');
-                if ($activenames) {
-                    \core\notification::warning(get_string(get_config('qbank_questionhub', 'stripactivecontent')
-                        ? 'import_active_content_stripped' : 'import_active_content', 'qbank_questionhub', (object)[
-                        'count' => count($activenames), 'names' => s(implode(', ', array_slice($activenames, 0, 10))),
-                    ]));
+                foreach (['kept' => 'import_active_content', 'removed' => 'import_active_content_stripped'] as $key => $string) {
+                    if ($activecontent[$key]) {
+                        \core\notification::warning(get_string($string, 'qbank_questionhub', (object)[
+                            'count' => count($activecontent[$key]),
+                            'names' => s(implode(', ', array_slice($activecontent[$key], 0, 10))),
+                        ]));
+                    }
+                }
+                if ($activecontent['coderunner_removed']) {
+                    \core\notification::warning(get_string('import_active_content_coderunner', 'qbank_questionhub'));
                 }
                 if (!$updatechanged) {
                     foreach ($items as &$item) {
@@ -393,6 +399,7 @@ if (data_submitted()) {
                     'title' => $title, 'packageid' => $packageid, 'version' => $version,
                     'targetcategoryid' => $targetcatid, 'categorymode' => $categorymode,
                     'updatechanged' => $updatechanged,
+                    'activekept' => !empty($activecontent['kept']),
                     'new' => array_values(array_filter($items, static function ($item) {
                         return $item['status'] === 'new';
                     })),
@@ -546,7 +553,7 @@ if ($canton !== '') {
 }
 
 // Fetch taxonomy and packages from marketplace.
-$client = new \qbank_questionhub\api_client(null, null, 30, true);
+$client = new \qbank_questionhub\api_client();
 $taxonomy = [];
 $packageresult = ['packages' => [], 'pagination' => ['page' => 1, 'limit' => 12, 'total' => 0, 'total_pages' => 1]];
 

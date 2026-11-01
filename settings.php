@@ -44,15 +44,7 @@ if ($ADMIN->fulltree) {
         PARAM_ALPHANUMEXT
     ));
 
-    // Institutional Token (PAT fallback).
-    $settings->add(new admin_setting_configpasswordunmask(
-        'qbank_questionhub/institutiontoken',
-        get_string('institutiontoken', 'qbank_questionhub'),
-        get_string('institutiontoken_desc', 'qbank_questionhub'),
-        ''
-    ));
-
-    // Test the saved Hub URL and tokens.
+    // Test the saved Hub URL and the admin's linked account.
     $settings->add(new admin_setting_description(
         'qbank_questionhub/testconnection',
         get_string('testconnection', 'qbank_questionhub'),
@@ -72,11 +64,19 @@ if ($ADMIN->fulltree) {
         1
     ));
 
-    // Clean HTML of imported packages (off: authors' scripts stay, as with Moodle's own XML import).
+    // Clean HTML of imported packages: anyone can publish on the Hub, so this differs from Moodle's own XML import.
     $settings->add(new admin_setting_configcheckbox(
         'qbank_questionhub/stripactivecontent',
         get_string('stripactivecontent', 'qbank_questionhub'),
         get_string('stripactivecontent_desc', 'qbank_questionhub'),
+        1
+    ));
+
+    // Exception for CodeRunner questions, whose interactive parts often rely on JavaScript.
+    $settings->add(new admin_setting_configcheckbox(
+        'qbank_questionhub/keepcoderunnercontent',
+        get_string('keepcoderunnercontent', 'qbank_questionhub'),
+        get_string('keepcoderunnercontent_desc', 'qbank_questionhub'),
         0
     ));
 }

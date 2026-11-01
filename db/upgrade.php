@@ -117,5 +117,11 @@ function xmldb_qbank_questionhub_upgrade(int $oldversion): bool {
         }
         upgrade_plugin_savepoint(true, 2026101525, 'qbank', 'questionhub');
     }
+
+    if ($oldversion < 2026110101) {
+        // The institutional token has no function any more: do not keep the secret.
+        unset_config('institutiontoken', 'qbank_questionhub');
+        upgrade_plugin_savepoint(true, 2026110101, 'qbank', 'questionhub');
+    }
     return true;
 }

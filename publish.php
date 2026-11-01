@@ -138,7 +138,7 @@ if ($updatepackageid !== '') {
         throw new moodle_exception('error_update_source', 'qbank_questionhub');
     }
     // Verify user owns this package on the Hub.
-    $accountclient = new \qbank_questionhub\api_client(null, null, 30, true);
+    $accountclient = new \qbank_questionhub\api_client();
     foreach ($accountclient->get_my_packages() as $candidate) {
         if ($candidate['id'] === $updatepackageid) {
             $ownedpackage = $candidate;
@@ -333,7 +333,7 @@ if ($issubmitted) {
             }
         }
 
-        $client = new \qbank_questionhub\api_client(null, null, 30, true);
+        $client = new \qbank_questionhub\api_client();
         if ($githubnewname !== '') {
             // Created first: if that fails, nothing is published. The Hub commits the release into it.
             $createdrepo = $client->create_github_repo($githubnewname);
@@ -500,7 +500,7 @@ $templatedata = [
             ? get_string('github_push_linked_unknown', 'qbank_questionhub')
             : get_string('github_push_unlinked', 'qbank_questionhub'))),
     'github_push_linked' => !empty($ownedpackage['github_repo']) || !empty($ownedpackage['github_linked']),
-] + ($ownedpackage ? [] : (new \qbank_questionhub\api_client(null, null, 30, true))->github_template_data(
+] + ($ownedpackage ? [] : (new \qbank_questionhub\api_client())->github_template_data(
     rtrim(get_config('qbank_questionhub', 'huburl') ?: 'https://hub.cblum.ch', '/')
 )) + [
     'is_private' => $ownedpackage ? (($ownedpackage['visibility'] ?? 'public') === 'private') : false,

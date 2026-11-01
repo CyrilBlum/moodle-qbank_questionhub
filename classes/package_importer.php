@@ -389,7 +389,7 @@ class package_importer {
                     } else {
                         if ($previoushashes === null) {
                             try {
-                                $client = new api_client(null, null, 30, true);
+                                $client = new api_client();
                                 $previousxml = $client->download_release($packageid, $history->package_version);
                                 $previoushashes = $this->release_fingerprints($previousxml);
                             } catch (\Throwable $e) {
@@ -474,9 +474,61 @@ class package_importer {
     }
 
     /**
-     * Runs every HTML text of a package through Moodle's HTML cleaner (HTML Purifier), which removes scripts,
-     * event handlers and frames. Moodle displays question text uncleaned, so this is the site's choice
-     * (setting stripactivecontent) for packages from authors it does not trust.
+     * Whether this site removes active content on import. Unset counts as on, like the default.
+     *
+     * @return bool
+     */
+    public static function strips_active_content(): bool {
+        return get_config('qbank_questionhub', 'stripactivecontent') !== '0';
+    }
+
+    /**
+     * Whether active content of a question of this type stays on import.
+     *
+     * @param string $qtype question type
+     * @return bool
+     */
+    public static function keeps_active_content(string $qtype): bool {
+        return !self::strips_active_content()
+            || ($qtype === 'coderunner' && get_config('qbank_questionhub', 'keepcoderunnercontent'));
+    }
+
+    /**
+     * Lists the questions of a package with active content by what an import does with it.
+     *
+     * @param string $xmlcontent Moodle XML package
+     * @return array keys kept and removed (question names), coderunner_removed (bool)
+     */
+    public static function active_content_questions(string $xmlcontent): array {
+        $result = ['kept' => [], 'removed' => [], 'coderunner_removed' => false];
+        $previous = libxml_use_internal_errors(true);
+        $doc = simplexml_load_string($xmlcontent, \SimpleXMLElement::class, LIBXML_NONET | LIBXML_PARSEHUGE);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+        if ($doc === false) {
+            return $result;
+        }
+        foreach ($doc->question as $question) {
+            $qtype = (string)$question['type'];
+            if ($qtype === 'category' || !preflight_validator::has_active_content($question)) {
+                continue;
+            }
+            if (self::keeps_active_content($qtype)) {
+                $result['kept'][] = (string)$question->name->text;
+            } else {
+                $result['removed'][] = (string)$question->name->text;
+                $result['coderunner_removed'] = $result['coderunner_removed'] || $qtype === 'coderunner';
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Runs every text of a package that Moodle displays as HTML through its HTML cleaner (HTML Purifier), which
+     * removes scripts, event handlers and frames. Moodle displays question text uncleaned, so this is the site's
+     * choice (setting stripactivecontent) for packages from authors it does not trust. CodeRunner questions stay
+     * as they are with the setting keepcoderunnercontent. Scripts that Twig or a template generate at run time
+     * cannot be found here.
      *
      * @param string $xml Moodle XML package
      * @return string the package with cleaned HTML texts
@@ -497,17 +549,42 @@ class package_importer {
             );
         }
         $xpath = new \DOMXPath($doc);
-        foreach ($xpath->query('//*[@format="html"]/text') as $node) {
-            $html = $node->textContent;
-            if (!preg_match(preflight_validator::ACTIVE_CONTENT_PATTERN, $html)) {
+        foreach ($xpath->query('//question') as $question) {
+            $qtype = $question->getAttribute('type');
+            if ($qtype === 'coderunner' && self::keeps_active_content($qtype)) {
                 continue;
             }
-            while ($node->firstChild) {
-                $node->removeChild($node->firstChild);
+            $plainanswers = in_array($qtype, preflight_validator::PLAIN_ANSWER_TYPES, true);
+            foreach ($xpath->query('.//*[@format and @format!="plain_text"]/text', $question) as $node) {
+                if (!$plainanswers || $node->parentNode->nodeName !== 'answer') {
+                    self::purify_node($doc, $node);
+                }
             }
-            $node->appendChild($doc->createTextNode(purify_html($html)));
+            if ($qtype === 'coderunner') {
+                $fields = implode('|', preflight_validator::CODERUNNER_UI_FIELDS);
+                foreach ($xpath->query($fields, $question) as $node) {
+                    self::purify_node($doc, $node);
+                }
+            }
         }
         return $doc->saveXML();
+    }
+
+    /**
+     * Replaces the content of an XML element by its cleaned HTML if it contains active content.
+     *
+     * @param \DOMDocument $doc
+     * @param \DOMNode $node
+     */
+    private static function purify_node(\DOMDocument $doc, \DOMNode $node): void {
+        $html = $node->textContent;
+        if (!preg_match(preflight_validator::ACTIVE_CONTENT_PATTERN, $html)) {
+            return;
+        }
+        while ($node->firstChild) {
+            $node->removeChild($node->firstChild);
+        }
+        $node->appendChild($doc->createTextNode(purify_html($html)));
     }
 
     /**
@@ -607,7 +684,7 @@ class package_importer {
         }
         if ($previoushashes === null) {
             try {
-                $client = new api_client(null, null, 30, true);
+                $client = new api_client();
                 $previoushashes = $this->release_fingerprints(
                     $client->download_release((string)$history->package_id, (string)$history->package_version)
                 );
@@ -978,7 +1055,7 @@ class package_importer {
             );
         }
 
-        if (get_config('qbank_questionhub', 'stripactivecontent')) {
+        if (self::strips_active_content()) {
             $processedxml = self::strip_active_content($processedxml);
         }
 

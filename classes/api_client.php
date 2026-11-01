@@ -44,17 +44,14 @@ class api_client {
      * @param string|null $token Explicit Bearer token or null to resolve automatically.
      * @param string|null $baseurl Explicit base URL or null to load from plugin settings.
      * @param int $timeout HTTP timeout in seconds.
-     * @param bool $userauthonly Use a user-linked token only, never the institutional fallback.
      */
-    public function __construct(?string $token = null, ?string $baseurl = null, int $timeout = 30, bool $userauthonly = false) {
+    public function __construct(?string $token = null, ?string $baseurl = null, int $timeout = 30) {
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
 
         $configuredurl = get_config('qbank_questionhub', 'huburl');
         $this->baseurl = rtrim($baseurl ?: ($configuredurl ?: 'https://hub.cblum.ch'), '/');
-        $this->token = $token !== null ? $token : ($userauthonly
-            ? auth_manager::resolve_user_token()
-            : auth_manager::resolve_active_token());
+        $this->token = $token !== null ? $token : auth_manager::resolve_user_token();
         $this->timeout = $timeout;
     }
 

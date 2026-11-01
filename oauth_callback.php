@@ -56,7 +56,7 @@ try {
     $redirecturi = (new moodle_url('/question/bank/questionhub/oauth_callback.php'))->out(false);
     $clientid = get_config('qbank_questionhub', 'clientid') ?: 'moodle-plugin-client';
 
-    // The token request must not carry the institutional token.
+    // The token request must not carry a user token.
     $client = new \qbank_questionhub\api_client('');
     $tokenresponse = $client->exchange_oauth_code($code, $oauthstate['code_verifier'], $redirecturi, $clientid);
 

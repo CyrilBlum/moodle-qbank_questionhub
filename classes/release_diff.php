@@ -113,7 +113,7 @@ class release_diff {
         $key = $history->package_id . '@' . $history->package_version;
         if (!isset($cache[$key])) {
             try {
-                $cache[$key] = (new api_client(null, null, 30, true))->download_release(
+                $cache[$key] = (new api_client())->download_release(
                     (string)$history->package_id,
                     (string)$history->package_version
                 );
