@@ -69,7 +69,9 @@ class provider implements
         $collection->link_external_location(
             'questionhub_marketplace',
             [
-                'email' => 'privacy:metadata:marketplace:email',
+                'access_token' => 'privacy:metadata:marketplace:access_token',
+                'questions' => 'privacy:metadata:marketplace:questions',
+                'packagemetadata' => 'privacy:metadata:marketplace:packagemetadata',
             ],
             'privacy:metadata:marketplace:explanation'
         );
