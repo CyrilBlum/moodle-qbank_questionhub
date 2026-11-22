@@ -1150,6 +1150,8 @@ $walk = function (
             // Local changes not yet on the Hub; for the package source, removed questions count too.
             $aheadknown = $ispackagesource ? $changesknown : $localchangesknown;
             $aheadcount = $ispackagesource ? $changescount : ($haslocalchanges ? (int)$localstatus : 0);
+            // Conflicts kept by the latest import of the linked category: these questions still differ from the Hub.
+            $openconflicts = $directlink && $directlink->action === 'import' ? (int)($directlink->conflicts ?? 0) : 0;
 
             $publishcategories[] = [
                 'id' => $cat->id,
@@ -1171,7 +1173,9 @@ $walk = function (
                 'ahead_count' => $aheadcount,
                 'remote_version' => $remoteversion,
                 'has_remote_update' => $islinked && $hasremoteupdate,
-                'is_in_sync' => $islinked && $aheadknown && $aheadcount === 0 && $remotechecked && !$hasremoteupdate,
+                'is_in_sync' => $islinked && $aheadknown && $aheadcount === 0 && $remotechecked && !$hasremoteupdate &&
+                    $openconflicts === 0,
+                'open_conflicts' => $openconflicts,
                 'can_pull' => $pulltargetid > 0,
                 'pull_target_id' => $pulltargetid,
                 'pull_title' => $pulltitle,
@@ -1262,20 +1266,8 @@ if ($showlibrary) {
             }
             usort($restoreversions, static fn(array $a, array $b): int => version_compare($b['version'], $a['version']));
         }
-        // Conflicts kept by the latest import of the linked version still differ from the Hub.
-        $openconflicts = 0;
-        if ($restoreversions) {
-            $lastimport = $DB->get_records('qbank_questionhub_history', [
-                'courseid' => (int)$COURSE->id, 'categoryid' => (int)$row['link_category_id'], 'package_id' => $packageid,
-            ], 'id DESC', 'id, action, package_version, conflicts', 0, 1);
-            $lastimport = reset($lastimport);
-            if ($lastimport && $lastimport->action === 'import' && $lastimport->package_version === $row['package_version']) {
-                $openconflicts = (int)$lastimport->conflicts;
-            }
-        }
         $library[] = $row + ['title' => $title !== '' ? $title : ($row['link_title'] ?: $packageid),
-            'hide_settings_toggle' => true, 'restore_versions' => $restoreversions, 'can_restore' => !empty($restoreversions),
-            'open_conflicts' => $openconflicts];
+            'hide_settings_toggle' => true, 'restore_versions' => $restoreversions, 'can_restore' => !empty($restoreversions)];
     }
     usort($library, static fn(array $a, array $b): int => strcasecmp($a['title'], $b['title']));
 }
