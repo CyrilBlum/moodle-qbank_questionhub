@@ -339,6 +339,11 @@ if (data_submitted()) {
         $updatechanged = $switchedimport ? true : (bool)optional_param('updatechanged', 0, PARAM_BOOL);
         $dryrun = $switchedimport ? true : (bool)optional_param('dryrun', 0, PARAM_BOOL);
         $resolutions = optional_param_array('resolution', [], PARAM_ALPHA);
+        // "All from the Hub" / "all local" buttons apply one decision to every conflict of the preview.
+        $resolveall = optional_param('resolveall', '', PARAM_ALPHA);
+        if (in_array($resolveall, ['hub', 'keep'], true)) {
+            $resolutions = array_fill_keys(array_keys($resolutions), $resolveall);
+        }
         if (!in_array($categorymode, ['keep', 'rename'], true)) {
             $categorymode = 'keep';
         }
@@ -489,6 +494,9 @@ if (data_submitted()) {
                     'added' => $result->addedcount, 'updated' => $result->updatedcount,
                     'unchanged' => $result->unchangedcount,
                 ]));
+                if ($result->keptcount > 0) {
+                    \core\notification::warning(get_string('import_conflicts_kept', 'qbank_questionhub', $result->keptcount));
+                }
             }
         } catch (\Exception $e) {
             \core\notification::error($e->getMessage());
@@ -1254,8 +1262,20 @@ if ($showlibrary) {
             }
             usort($restoreversions, static fn(array $a, array $b): int => version_compare($b['version'], $a['version']));
         }
+        // Conflicts kept by the latest import of the linked version still differ from the Hub.
+        $openconflicts = 0;
+        if ($restoreversions) {
+            $lastimport = $DB->get_records('qbank_questionhub_history', [
+                'courseid' => (int)$COURSE->id, 'categoryid' => (int)$row['link_category_id'], 'package_id' => $packageid,
+            ], 'id DESC', 'id, action, package_version, conflicts', 0, 1);
+            $lastimport = reset($lastimport);
+            if ($lastimport && $lastimport->action === 'import' && $lastimport->package_version === $row['package_version']) {
+                $openconflicts = (int)$lastimport->conflicts;
+            }
+        }
         $library[] = $row + ['title' => $title !== '' ? $title : ($row['link_title'] ?: $packageid),
-            'hide_settings_toggle' => true, 'restore_versions' => $restoreversions, 'can_restore' => !empty($restoreversions)];
+            'hide_settings_toggle' => true, 'restore_versions' => $restoreversions, 'can_restore' => !empty($restoreversions),
+            'open_conflicts' => $openconflicts];
     }
     usort($library, static fn(array $a, array $b): int => strcasecmp($a['title'], $b['title']));
 }

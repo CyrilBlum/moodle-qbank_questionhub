@@ -42,6 +42,9 @@ class import_result {
     /** @var int Unchanged questions skipped. */
     public int $unchangedcount = 0;
 
+    /** @var int Conflicts kept as local version; these questions still differ from the Hub. */
+    public int $keptcount = 0;
+
     /** @var array Non-blocking warnings encountered. */
     public array $warnings;
 

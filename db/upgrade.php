@@ -123,5 +123,15 @@ function xmldb_qbank_questionhub_upgrade(int $oldversion): bool {
         unset_config('institutiontoken', 'qbank_questionhub');
         upgrade_plugin_savepoint(true, 2026110101, 'qbank', 'questionhub');
     }
+
+    if ($oldversion < 2026112201) {
+        // Conflicts kept by an import, so the library can point to them without a newer release.
+        $table = new xmldb_table('qbank_questionhub_history');
+        $field = new xmldb_field('conflicts', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'snapshotted');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026112201, 'qbank', 'questionhub');
+    }
     return true;
 }

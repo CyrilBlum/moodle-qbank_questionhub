@@ -27,7 +27,7 @@
 class backup_qbank_questionhub_plugin extends backup_qbank_plugin {
     /** @var string[] Fields of a link. */
     private const LINK_FIELDS = ['userid', 'action', 'package_id', 'package_version', 'package_title', 'courseid',
-        'categoryid', 'question_count', 'timecreated', 'snapshotted'];
+        'categoryid', 'question_count', 'timecreated', 'snapshotted', 'conflicts'];
 
     /**
      * Returns the structure to attach to the question element.

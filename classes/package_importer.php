@@ -1037,6 +1037,7 @@ class package_importer {
             $item['status'] = ['keep' => 'kept', 'hub' => 'update', 'both' => 'copy'][$resolution];
         }
         unset($item);
+        $keptcount = count(array_filter($plan, static fn($item) => $item['status'] === 'kept'));
         // A release without content changes still has to be recorded, or the category keeps offering it.
         $needsimport = $categorymode === null || (bool)array_filter($plan, static function ($item) {
             return !in_array($item['status'], ['unchanged', 'kept'], true);
@@ -1233,6 +1234,7 @@ class package_importer {
             $history->question_count = $addedcount + $updatedcount;
             $history->timecreated = time();
             $history->snapshotted = 0;
+            $history->conflicts = $keptcount;
             $historyid = $DB->insert_record('qbank_questionhub_history', $history);
 
             try {
@@ -1274,6 +1276,7 @@ class package_importer {
         $result->addedcount = $addedcount;
         $result->updatedcount = $updatedcount;
         $result->unchangedcount = $unchangedcount;
+        $result->keptcount = $keptcount;
         return $result;
     }
 }

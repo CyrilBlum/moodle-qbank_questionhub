@@ -129,6 +129,11 @@
                 <div class="border border-danger rounded p-3 mb-3">
                     <h6 class="text-danger">{{#str}} import_preview_conflicts_heading, qbank_questionhub {{/str}}</h6>
                     <p class="small text-muted">{{#str}} import_preview_conflicts_help, qbank_questionhub {{/str}}</p>
+                    {{! Decide all conflicts at once; the button imports right away like the main button. }}
+                    <div class="mb-3">
+                        <button type="submit" name="resolveall" value="hub" class="btn btn-sm btn-outline-primary mr-1 me-1">{{#str}} conflict_all_hub, qbank_questionhub {{/str}}</button>
+                        <button type="submit" name="resolveall" value="keep" class="btn btn-sm btn-outline-secondary">{{#str}} conflict_all_keep, qbank_questionhub {{/str}}</button>
+                    </div>
                     {{#conflict}}
                     <fieldset class="mb-2">
                         <legend class="h6 mb-1">{{name}}{{#category}} <small class="text-muted">({{category}})</small>{{/category}}{{#renamed_from}} <small class="text-success"><b>R</b> {{#str}} import_preview_renamed, qbank_questionhub, {{renamed_from}} {{/str}}</small>{{/renamed_from}}{{#moved_label}} <small class="text-success"><b>R</b> {{moved_label}}</small>{{/moved_label}}</legend>
@@ -576,6 +581,25 @@
                     {{> qbank_questionhub/sync_status }}
                     {{> qbank_questionhub/sync_actions }}
                 </span>
+                {{#open_conflicts}}
+                {{! Conflicts kept by the last pull: compare with the linked version again, without a newer release. }}
+                <form method="post" action="{{action_url}}#importPreview" class="w-100 mt-1 small d-flex align-items-center flex-wrap">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}">
+                    <input type="hidden" name="action" value="import_package">
+                    <input type="hidden" name="courseid" value="{{courseid}}">
+                    <input type="hidden" name="bankcontextid" value="{{bankcontextid}}">
+                    {{#cmid}}<input type="hidden" name="cmid" value="{{cmid}}">{{/cmid}}
+                    <input type="hidden" name="packageid" value="{{package_id}}">
+                    <input type="hidden" name="title" value="{{title}}">
+                    <input type="hidden" name="version" value="{{package_version}}">
+                    <input type="hidden" name="targetcategoryid" value="{{link_category_id}}">
+                    <input type="hidden" name="categorymode" value="keep">
+                    <input type="hidden" name="updatechanged" value="1">
+                    <input type="hidden" name="dryrun" value="1">
+                    <span class="badge badge-warning bg-warning text-dark mr-2 me-2"><i class="fa fa-exclamation-triangle mr-1" aria-hidden="true"></i>{{#str}} library_open_conflicts, qbank_questionhub, {{open_conflicts}} {{/str}}</span>
+                    <button type="submit" class="btn btn-sm btn-outline-warning">{{#str}} library_open_conflicts_review, qbank_questionhub {{/str}}</button>
+                </form>
+                {{/open_conflicts}}
                 {{#can_restore}}
                 {{! Import an older release into the linked category again; the preview shows what changes. }}
                 <details class="w-100 mt-1 small">
