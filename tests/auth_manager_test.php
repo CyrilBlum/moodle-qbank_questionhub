@@ -54,4 +54,22 @@ final class auth_manager_test extends \advanced_testcase {
         $this->assertFalse(auth_manager::linking_allowed());
         $this->assertNull(auth_manager::resolve_user_token(2));
     }
+
+    /**
+     * An expired token no longer resolves and reports its expiry, so the page can ask to connect again.
+     */
+    public function test_expired_token_is_not_linked(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        auth_manager::save_user_token(2, 'mqh_pat_test');
+        $this->assertNull(auth_manager::token_expired_at(2));
+        $expired = time() - DAYSECS;
+        $DB->set_field('qbank_questionhub_tokens', 'expires_at', $expired, ['userid' => 2]);
+        $this->assertNull(auth_manager::resolve_user_token(2));
+        $this->assertSame($expired, auth_manager::token_expired_at(2));
+        auth_manager::save_user_token(2, 'mqh_pat_new', [], 0);
+        $this->assertSame('mqh_pat_new', auth_manager::resolve_user_token(2));
+        $this->assertNull(auth_manager::token_expired_at(2));
+    }
 }

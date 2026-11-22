@@ -674,7 +674,10 @@ foreach ($packageresult['data'] ?? $packageresult['packages'] ?? [] as $pkg) {
 
 // Get user account linking status.
 $userrecord = \qbank_questionhub\auth_manager::get_user_token_record((int)$USER->id);
-$hasaccount = !empty($userrecord) && !empty($userrecord->access_token);
+// Only a usable token counts as linked: an expired one is shown as such, so the teacher connects again.
+$hasaccount = \qbank_questionhub\auth_manager::resolve_user_token((int)$USER->id) !== null;
+$expiredat = \qbank_questionhub\auth_manager::linking_allowed()
+    ? \qbank_questionhub\auth_manager::token_expired_at((int)$USER->id) : null;
 $accountname = $hasaccount
     ? ($userrecord->hub_name ?: ($userrecord->hub_email ?: get_string('account_connected', 'qbank_questionhub'))) : '';
 $huburl = rtrim(get_config('qbank_questionhub', 'huburl') ?: 'https://hub.cblum.ch', '/');
@@ -1320,6 +1323,8 @@ $templatedata = [
     'has_account' => $hasaccount,
     'linking_allowed' => \qbank_questionhub\auth_manager::linking_allowed(),
     'account_name' => $accountname,
+    'account_expired' => $expiredat !== null,
+    'account_expired_date' => $expiredat !== null ? userdate($expiredat, get_string('strftimedate', 'langconfig')) : '',
     'connect_url' => $connecturl,
     'disconnect_url' => $disconnecturl->out(false),
     'browser_url' => (new moodle_url('/question/bank/questionhub/view.php'))->out(false),

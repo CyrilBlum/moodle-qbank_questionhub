@@ -58,6 +58,20 @@ class auth_manager {
     }
 
     /**
+     * Returns when a user's stored Hub token expired, or null if it is valid, has no expiry or none is stored.
+     *
+     * @param int $userid
+     * @return int|null Expiry time (Unix timestamp) of an expired token.
+     */
+    public static function token_expired_at(int $userid): ?int {
+        $record = self::get_user_token_record($userid);
+        if (!$record || empty($record->access_token) || (int)$record->expires_at === 0 || (int)$record->expires_at > time()) {
+            return null;
+        }
+        return (int)$record->expires_at;
+    }
+
+    /**
      * Retrieves token record for a given user.
      *
      * @param int $userid

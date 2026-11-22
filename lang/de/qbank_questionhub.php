@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['account_connected'] = 'Verbunden';
+$string['account_expired'] = 'Die Verbindung mit Question Hub ist am {$a} abgelaufen. Bitte verbinden Sie Ihr Konto erneut.';
 $string['account_linked_as'] = 'Mit Question Hub verknüpft als: {$a}';
 $string['account_linking_disabled'] = 'Die Administration hat das Verknüpfen von Question-Hub-Konten ausgeschaltet. Sie können öffentliche Pakete durchsuchen und importieren.';
 $string['account_not_linked'] = 'Ihr Konto ist noch nicht mit Question Hub verknüpft.';

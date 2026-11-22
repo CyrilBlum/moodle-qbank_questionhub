@@ -43,8 +43,11 @@
     <div class="alert alert-light border d-flex justify-content-between align-items-center mb-4 flex-wrap">
         <div class="mb-2 mb-md-0">
             <i class="fa fa-info-circle mr-2 text-primary" aria-hidden="true"></i>
+            {{#account_expired}}{{#str}} account_expired, qbank_questionhub, {{account_expired_date}} {{/str}}{{/account_expired}}
+            {{^account_expired}}
             {{#linking_allowed}}{{#str}} account_not_linked, qbank_questionhub {{/str}}{{/linking_allowed}}
             {{^linking_allowed}}{{#str}} account_linking_disabled, qbank_questionhub {{/str}}{{/linking_allowed}}
+            {{/account_expired}}
         </div>
         {{#linking_allowed}}
         <div class="d-flex align-items-center">
@@ -542,7 +545,7 @@
     </div>
     {{/has_account}}
     {{^has_account}}
-    <div class="alert alert-info">{{#str}} account_not_linked, qbank_questionhub {{/str}} <a href="{{connect_url}}">{{#str}} link_account_button, qbank_questionhub {{/str}}</a></div>
+    <div class="alert alert-info">{{#account_expired}}{{#str}} account_expired, qbank_questionhub, {{account_expired_date}} {{/str}}{{/account_expired}}{{^account_expired}}{{#str}} account_not_linked, qbank_questionhub {{/str}}{{/account_expired}} <a href="{{connect_url}}">{{#str}} link_account_button, qbank_questionhub {{/str}}</a></div>
     {{/has_account}}
     {{/show_my_packages}}
 
