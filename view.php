@@ -339,7 +339,7 @@ if (data_submitted()) {
         $updatechanged = $switchedimport ? true : (bool)optional_param('updatechanged', 0, PARAM_BOOL);
         $dryrun = $switchedimport ? true : (bool)optional_param('dryrun', 0, PARAM_BOOL);
         $resolutions = optional_param_array('resolution', [], PARAM_ALPHA);
-        // "All from the Hub" / "all local" buttons apply one decision to every conflict of the preview.
+        // The buttons for all conflicts apply one decision (Hub or local) to every conflict of the preview.
         $resolveall = optional_param('resolveall', '', PARAM_ALPHA);
         if (in_array($resolveall, ['hub', 'keep'], true)) {
             $resolutions = array_fill_keys(array_keys($resolutions), $resolveall);
