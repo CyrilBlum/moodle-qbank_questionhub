@@ -133,5 +133,15 @@ function xmldb_qbank_questionhub_upgrade(int $oldversion): bool {
         }
         upgrade_plugin_savepoint(true, 2026112201, 'qbank', 'questionhub');
     }
+
+    if ($oldversion < 2026112203) {
+        // Personal access tokens were stored with the 30-day OAuth lifetime and then treated as expired although
+        // the Hub still accepted them. Their expiry is the Hub's business: clear the local one.
+        $DB->execute(
+            'UPDATE {qbank_questionhub_tokens} SET expires_at = 0 WHERE ' . $DB->sql_like('access_token', ':prefix'),
+            ['prefix' => $DB->sql_like_escape('mqh_pat_') . '%']
+        );
+        upgrade_plugin_savepoint(true, 2026112203, 'qbank', 'questionhub');
+    }
     return true;
 }

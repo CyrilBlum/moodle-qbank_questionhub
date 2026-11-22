@@ -72,4 +72,22 @@ final class auth_manager_test extends \advanced_testcase {
         $this->assertSame('mqh_pat_new', auth_manager::resolve_user_token(2));
         $this->assertNull(auth_manager::token_expired_at(2));
     }
+
+    /**
+     * A personal access token keeps the expiry set on the Hub: it is not cut to the 30-day OAuth lifetime.
+     * An OAuth token still expires locally after its lifetime.
+     */
+    public function test_personal_access_token_has_no_local_expiry(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        auth_manager::save_user_token(2, 'mqh_pat_year');
+        $this->assertSame('0', (string)$DB->get_field('qbank_questionhub_tokens', 'expires_at', ['userid' => 2]));
+        auth_manager::save_user_token(2, 'mqh_pat_year', [], 2592000);
+        $this->assertSame('0', (string)$DB->get_field('qbank_questionhub_tokens', 'expires_at', ['userid' => 2]));
+        auth_manager::save_user_token(2, 'eyJ.oauth.token');
+        $expires = (int)$DB->get_field('qbank_questionhub_tokens', 'expires_at', ['userid' => 2]);
+        $this->assertGreaterThan(time() + 29 * DAYSECS, $expires);
+        $this->assertLessThanOrEqual(time() + 30 * DAYSECS, $expires);
+    }
 }

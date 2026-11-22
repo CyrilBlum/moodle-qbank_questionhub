@@ -29,6 +29,9 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class auth_manager {
+    /** Prefix of a personal access token created on the Hub. */
+    public const PAT_PREFIX = 'mqh_pat_';
+
     /**
      * Whether the site lets teachers link a Hub account (OAuth or PAT); unset counts as allowed, like the default.
      */
@@ -89,10 +92,15 @@ class auth_manager {
      * @param int $userid
      * @param string $accesstoken
      * @param array $userdata Optional marketplace user metadata.
-     * @param int $expiresin Token lifetime in seconds (default: 30 days).
+     * @param int $expiresin Token lifetime in seconds (default: 30 days, the OAuth token). Ignored for a personal
+     *     access token: its expiry is set on the Hub (e.g. one year or none), which rejects it once it has expired.
      */
     public static function save_user_token(int $userid, string $accesstoken, array $userdata = [], int $expiresin = 2592000): void {
         global $DB;
+
+        if (str_starts_with($accesstoken, self::PAT_PREFIX)) {
+            $expiresin = 0;
+        }
 
         $now = time();
         $record = $DB->get_record('qbank_questionhub_tokens', ['userid' => $userid]);
