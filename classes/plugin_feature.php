@@ -25,8 +25,8 @@ use moodle_url;
 /**
  * Question Bank subplugin feature entrypoint for Question Hub.
  *
- * Implements dual-version compatible signatures across Moodle 4.5 LTS (PHP 8.1)
- * and Moodle 5.0 Stable (PHP 8.2).
+ * Implements compatible signatures across Moodle 4.5 LTS (PHP 8.1), Moodle 5.0 (PHP 8.2)
+ * and Moodle 5.3 LTS (PHP 8.3).
  *
  * @package    qbank_questionhub
  * @copyright  2026 Cyril Blum
@@ -88,7 +88,7 @@ class plugin_feature extends plugin_features_base {
         }
 
         $courseid = $qbank->get_courseid();
-        $params = ['courseid' => $courseid, 'cat' => $categoryid];
+        $params = array_filter(['courseid' => $courseid, 'cat' => category_param::for_category($categoryid)]);
         if (!empty($qbank->cm)) {
             $params['cmid'] = $qbank->cm->id;
         }

@@ -4,7 +4,7 @@ Native Moodle subplugin extending the core Question Bank subsystem, enabling tea
 
 ## Key Features
 
-- **Dual-Version Compatibility:** Fully verified across **Moodle 4.5.15 LTS (PHP 8.1)** and **Moodle 5.0.11 Stable (PHP 8.2)**.
+- **Dual-Version Compatibility:** Fully verified across **Moodle 4.5.15 LTS (PHP 8.1)**, **Moodle 5.0.11 Stable (PHP 8.2)** and **Moodle 5.3.1 LTS (PHP 8.3)**.
 - **Deep Question Bank UI Integration:**
   - Question Bank tertiary action navigation tab ("Question Hub") in course and quiz contexts.
   - Question row action menu item ("Export to Question Hub") at position 610.

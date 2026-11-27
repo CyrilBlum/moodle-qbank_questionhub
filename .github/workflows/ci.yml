@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['8.1', '8.2']
+        php-version: ['8.1', '8.2', '8.3']
 
     steps:
     - name: Checkout code
@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-22.04
     services:
       postgres:
-        image: postgres:14
+        image: postgres:${{ matrix.postgres }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_HOST_AUTH_METHOD: trust
@@ -55,8 +55,14 @@ jobs:
         include:
           - php: '8.1'
             moodle-branch: 'MOODLE_405_STABLE'
+            postgres: '14'
           - php: '8.2'
             moodle-branch: 'MOODLE_500_STABLE'
+            postgres: '14'
+          # Moodle 5.3 LTS needs PHP 8.3 and PostgreSQL 17.
+          - php: '8.3'
+            moodle-branch: 'MOODLE_503_STABLE'
+            postgres: '17'
     steps:
       - name: Check out plugin
         uses: actions/checkout@v4

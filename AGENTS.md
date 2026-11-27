@@ -5,7 +5,7 @@ deploy and test procedures, pitfalls) lives in the marketplace repo:
 `CyrilBlum/Moodle-Question-Hub-Marketplace` -> `AGENTS.md` (also copied to `Moodle Question Hub/AGENTS.md` locally).
 
 Plugin quick facts:
-- Component `qbank_questionhub`, installed at `question/bank/questionhub` on Moodle 5.0 and 4.5.
+- Component `qbank_questionhub`, installed at `question/bank/questionhub` on Moodle 4.5, 5.0 and 5.3.
 - Entry points: `view.php` (Hub browser, import, my packages, edit/withdraw), `publish.php` (export + publish),
   `oauth_callback.php`, `disconnect.php`; logic in `classes/` (`api_client`, `package_exporter`, `package_importer`,
   `preflight_validator`, `auth_manager`).

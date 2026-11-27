@@ -57,10 +57,16 @@ if ($resolvedcmid <= 0) {
         }
     }
 }
-if (!data_submitted() && ($resolvedcmid !== $requestcmid || $resolvedcourseid !== $requestcourseid)) {
+// question_edit_setup() needs 'cat' as "categoryid,contextid"; older links pass the bare category id.
+$requestcat = optional_param('cat', '', PARAM_SEQUENCE);
+$resolvedcat = \qbank_questionhub\category_param::normalise($requestcat);
+if (
+    !data_submitted() &&
+    ($resolvedcmid !== $requestcmid || $resolvedcourseid !== $requestcourseid || $resolvedcat !== $requestcat)
+) {
     $resolvedurl = new moodle_url(qualified_me());
-    $resolvedurl->remove_params(['cmid', 'courseid']);
-    $resolvedurl->params(array_filter(['cmid' => $resolvedcmid, 'courseid' => $resolvedcourseid]));
+    $resolvedurl->remove_params(['cmid', 'courseid', 'cat']);
+    $resolvedurl->params(array_filter(['cmid' => $resolvedcmid, 'courseid' => $resolvedcourseid, 'cat' => $resolvedcat]));
     redirect($resolvedurl);
 }
 
