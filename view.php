@@ -57,7 +57,7 @@ if ($resolvedcmid <= 0) {
         }
     }
 }
-// question_edit_setup() needs 'cat' as "categoryid,contextid"; older links pass the bare category id.
+// The question bank setup needs 'cat' as "categoryid,contextid"; older links pass the bare category id.
 $requestcat = optional_param('cat', '', PARAM_SEQUENCE);
 $resolvedcat = \qbank_questionhub\category_param::normalise($requestcat);
 if (

@@ -1248,7 +1248,8 @@ class package_importer {
                 if (!empty($importedquestions) || $categorymode !== null) {
                     publication_tracker::save((int)$historyid, $importedquestions);
                 }
-            } catch (\Throwable $ignore) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+                // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+            } catch (\Throwable $ignore) {
                 // Non-fatal if snapshot fails during import.
             }
 
@@ -1259,7 +1260,8 @@ class package_importer {
             if (!$transaction->is_disposed()) {
                 try {
                     $transaction->rollback($t);
-                } catch (\Throwable $ignore) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+                    // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+                } catch (\Throwable $ignore) {
                     // Moodle's rollback_delegated_transaction re-throws $t.
                 }
             }

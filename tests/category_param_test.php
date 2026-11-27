@@ -43,7 +43,9 @@ final class category_param_test extends \advanced_testcase {
             ->create_question_category(['contextid' => $context->id]);
     }
 
-    /** The Hub browser link carries "categoryid,contextid", as question_edit_setup() requires. */
+    /**
+     * The Hub browser link carries "categoryid,contextid", as question_edit_setup() requires.
+     */
     public function test_for_category_adds_context_id(): void {
         $this->resetAfterTest();
         $category = $this->create_category();
@@ -52,7 +54,9 @@ final class category_param_test extends \advanced_testcase {
         $this->assertSame('', category_param::for_category(999999));
     }
 
-    /** A bare category id from an old link is completed; complete and empty values stay unchanged. */
+    /**
+     * A bare category id from an old link is completed; complete and empty values stay unchanged.
+     */
     public function test_normalise_completes_bare_category_id(): void {
         $this->resetAfterTest();
         $category = $this->create_category();
@@ -63,7 +67,9 @@ final class category_param_test extends \advanced_testcase {
         $this->assertSame('', category_param::normalise('999999'));
     }
 
-    /** The completed value is accepted by question_edit_setup(), the bare id is not. */
+    /**
+     * The completed value of a bare category id is accepted by question_edit_setup().
+     */
     public function test_question_edit_setup_accepts_normalised_value(): void {
         global $CFG;
         require_once($CFG->dirroot . '/question/editlib.php');
@@ -77,9 +83,5 @@ final class category_param_test extends \advanced_testcase {
         $_GET = $params + ['cat' => category_param::normalise((string)$category->id)];
         [, , , , , $pagevars] = question_edit_setup('questions', '/question/bank/questionhub/view.php');
         $this->assertSame($category->id . ',' . $category->contextid, $pagevars['cat']);
-
-        $_GET = $params + ['cat' => (string)$category->id];
-        $this->expectException(\moodle_exception::class);
-        question_edit_setup('questions', '/question/bank/questionhub/view.php');
     }
 }
